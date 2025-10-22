@@ -1,0 +1,82 @@
+class MooreNode:
+    def __init__(self, name, output):
+        self.name = name
+        self.output = output
+        self.transitions = {}
+
+    def connect(self, inp, next_state):
+        self.transitions[inp] = next_state
+
+
+class MooreFSM:
+    def __init__(self):
+        self.states = {
+            'A': MooreNode('A', 'b'),
+            'B': MooreNode('B', 'b'),
+            'C': MooreNode('C', 'a')
+        }
+        self.states['A'].connect('0', 'B')
+        self.states['A'].connect('1', 'A')
+        self.states['B'].connect('1', 'C')
+        self.states['B'].connect('0', 'A')
+        self.states['C'].connect('0', 'B')
+        self.states['C'].connect('1', 'B')
+        self.current = self.states['A']
+
+    def run(self, data):
+        print("\nMOORE MACHINE EXECUTION")
+        print(f"{'Input':<6}{'State':<6}{'Output'}")
+        output = ""
+        for ch in data:
+            print(f"{ch:<6}{self.current.name:<6}{self.current.output}")
+            output += self.current.output
+            self.current = self.states[self.current.transitions[ch]]
+        print(f"{'':<6}{self.current.name:<6}{self.current.output}")
+        output += self.current.output
+        print(f"\nFinal Output: {output}")
+
+
+class MealyNode:
+    def __init__(self, name):
+        self.name = name
+        self.transitions = {}
+
+    def connect(self, inp, next_state, output):
+        self.transitions[inp] = (next_state, output)
+
+
+class MealyFSM:
+    def __init__(self):
+        self.states = {
+            'A': MealyNode('A'),
+            'B': MealyNode('B')
+        }
+        self.states['A'].connect('0', 'B', 'b')
+        self.states['A'].connect('1', 'A', 'b')
+        self.states['B'].connect('0', 'B', 'b')
+        self.states['B'].connect('1', 'A', 'a')
+        self.current = self.states['A']
+
+    def run(self, data):
+        print("\nMEALY MACHINE EXECUTION")
+        print(f"{'Input':<6}{'State':<6}{'Output'}")
+        output = ""
+        for ch in data:
+            nxt, out = self.current.transitions[ch]
+            print(f"{ch:<6}{self.current.name:<6}{out}")
+            output += out
+            self.current = self.states[nxt]
+        print(f"\nFinal Output: {output}")
+
+
+if __name__ == "__main__":
+    while True:
+        s = input("Enter binary string (e.g. 01101) or 'exit': ").strip()
+        if s.lower() in ['exit', 'quit']:
+            break
+        if not all(c in '01' for c in s):
+            print("Invalid input!\n")
+            continue
+        MooreFSM().run(s)
+        MealyFSM().run(s)
+        print("\n-------------------------\n")
